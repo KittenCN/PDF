@@ -9,6 +9,7 @@ predict/
 *.jpg
 *.png
 *.pdf
+*.ttf
 
 # C extensions
 *.so

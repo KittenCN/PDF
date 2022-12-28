@@ -1,11 +1,20 @@
+# -*- coding:utf-8 -*-
 from PIL import Image
 import os
-
-templateadd = r'./template/'
-pre_processadd = r'./pre_process/'
-post_processadd = r'./post_process/'
+from common import *
+from sign import sign
+import pandas as pd
 
 if __name__ == "__main__":
+    for item in os.listdir(post_processadd):
+        os.remove(post_processadd + item)
+    for item in os.listdir(pre_processadd):
+        os.remove(pre_processadd + item)
+    
+    csvfile = pd.read_csv(r'./csv/data.csv').values
+    for row in csvfile:
+        sign(row[0], row[1])
+
     tempfiles = os.listdir(templateadd)
     prefiles = os.listdir(pre_processadd)
     jpgfiles = []
@@ -25,7 +34,8 @@ if __name__ == "__main__":
                 if _jpgfile.mode == "RGB":
                     _jpgfile = _jpgfile.convert("RGB")
                 source.append(_jpgfile)
-            output.save(post_processadd + str(index) + ".pdf", "pdf", save_all=True, append_images=source)
+            _name = pre.split('.')[0]
+            output.save(post_processadd + _name + ".pdf", "pdf", save_all=True, append_images=source)
 
 
                     
