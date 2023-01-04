@@ -35,7 +35,7 @@ if __name__ == "__main__":
                     _jpgfile = _jpgfile.convert("RGB")
                 source.append(_jpgfile)
             _name = pre.split('.')[0]
-            output.save(post_processadd + _name + ".pdf", "pdf", save_all=True, append_images=source)
+            output.save(post_processadd + str(_name) + ".pdf", "pdf", save_all=True, append_images=source)
 
 
                     

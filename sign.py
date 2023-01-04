@@ -38,4 +38,4 @@ def sign(text, filename):
     images = handwrite(text, template)
     for i, im in enumerate(images):
         assert isinstance(im, Image.Image)
-        im.save("./pre_process/" + filename + ".jpg")
+        im.save("./pre_process/" + str(filename) + ".jpg")
