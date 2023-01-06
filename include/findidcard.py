@@ -185,36 +185,36 @@ class findidcard:
 
     def get_result_vary_length(self, red, langset, org_img, custom_config=''):
         red_org = red
-        # cv2.fastNlMeansDenoising(red, red, 4, 7, 35)
-        rec, red = cv2.threshold(red, 127, 255, cv2.THRESH_BINARY_INV)
-        contours, hierarchy = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # print(len(contours))
-        # 描边一次可以减少噪点
-        cv2.drawContours(red, contours, -1, (255, 255, 255), 1)
-        color_img = cv2.cvtColor(red, cv2.COLOR_GRAY2BGR)
-        numset_contours = []
-        height_list=[]
-        width_list=[]
-        for cnt in contours:
-            x, y, w, h = cv2.boundingRect(cnt)
-            height_list.append(h)
-            # print(h,w)
-            width_list.append(w)
-        height_list.remove(max(height_list))
-        width_list.remove(max(width_list))
-        height_threshold = 0.70*max(height_list)
-        width_threshold = 1.4 * max(width_list)
-        # print('height_threshold:'+str(height_threshold)+'width_threshold:'+str(width_threshold))
-        big_rect=[]
-        for cnt in contours:
-            x, y, w, h = cv2.boundingRect(cnt)
-            if h > height_threshold and w < width_threshold:
-                # print(h,w)
-                numset_contours.append((x, y, w, h))
-                big_rect.append((x, y))
-                big_rect.append((x + w, y + h))
-        big_rect_nparray = np.array(big_rect, ndmin=3)
-        x, y, w, h = cv2.boundingRect(big_rect_nparray)
+        # # cv2.fastNlMeansDenoising(red, red, 4, 7, 35)
+        # rec, red = cv2.threshold(red, 127, 255, cv2.THRESH_BINARY_INV)
+        # contours, hierarchy = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # # print(len(contours))
+        # # 描边一次可以减少噪点
+        # cv2.drawContours(red, contours, -1, (255, 255, 255), 1)
+        # color_img = cv2.cvtColor(red, cv2.COLOR_GRAY2BGR)
+        # numset_contours = []
+        # height_list=[]
+        # width_list=[]
+        # for cnt in contours:
+        #     x, y, w, h = cv2.boundingRect(cnt)
+        #     height_list.append(h)
+        #     # print(h,w)
+        #     width_list.append(w)
+        # height_list.remove(max(height_list))
+        # width_list.remove(max(width_list))
+        # height_threshold = 0.70*max(height_list)
+        # width_threshold = 1.4 * max(width_list)
+        # # print('height_threshold:'+str(height_threshold)+'width_threshold:'+str(width_threshold))
+        # big_rect=[]
+        # for cnt in contours:
+        #     x, y, w, h = cv2.boundingRect(cnt)
+        #     if h > height_threshold and w < width_threshold:
+        #         # print(h,w)
+        #         numset_contours.append((x, y, w, h))
+        #         big_rect.append((x, y))
+        #         big_rect.append((x + w, y + h))
+        # big_rect_nparray = np.array(big_rect, ndmin=3)
+        # x, y, w, h = cv2.boundingRect(big_rect_nparray)
 
         # imgrect = cv2.rectangle(color_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
         # self.showimg(imgrect)
