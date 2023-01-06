@@ -58,55 +58,59 @@ def identity_ocr_chinese(pic_path):
     # img = Image.open(pic_path)
     content = ""
     idfind = findidcard.findidcard()
-    img = idfind.find(pic_path)
+    img, idnum = idfind.find(pic_path)
     if img != False:
         img = img.get()
         img = Image.fromarray(cv2.cvtColor(img,cv2.COLOR_BGR2RGB))
         content = pytesseract.image_to_string(img, lang='chi_sim')
-    return content
+    return content, idnum
 
 if __name__ == "__main__":
-    # pic_path = r"ori_id\test3_2.jpg"
+    # pic_path = r"ori_id\img (20).jpg"
     # print(identity_ocr_chinese(pic_path))
+    endstring = ["jpg", "png"]
     for item in os.listdir(post_idadd):
         os.remove(post_idadd + item)
-    filename = ""
-    lastfilename = ""
-    filecnt = 0
-    blockcnt = 0
-    for index, item in enumerate(os.listdir(ori_idadd)):
-        if blockcnt >= 2:
-            print(lastfilename)
-            filename = ""
-            lastfilename = ""
-            filecnt = 0
-            blockcnt = 0
-        if filecnt >= 2:
-            filename = ""
-            lastfilename = ""
-            filecnt = 0
-            blockcnt = 0
-        if item.endswith('.jpg') or item.endswith('.png'):
-            pic_path = ori_idadd + item
-            content = identity_ocr_chinese(pic_path)
-            content = content.replace("\n", "")
-            conlist = content.split(" ")
-            for con in conlist:
-                if func.is_identi_number(con) != False:
-                    filename = con
-                    break
-            if filename != "":
-                filecnt += 1
-                filenameend = item.split(".")[1]
-                newfilename = filename + '_' + str(filecnt) + "." + filenameend
-                shutil.copy(pic_path, post_idadd + newfilename)
-                if lastfilename != "":
-                    filecnt += 1
-                    filenameend = item.split(".")[1]
-                    newfilename = filename + '_' + str(filecnt) + "." + filenameend
-                    shutil.copy(lastfilename, post_idadd + newfilename)
-            else:
-                lastfilename = pic_path
-                blockcnt += 1
+    filename = [""] * 2
+    address = os.listdir(ori_idadd)
+    address.sort(key = lambda x:int(x.split('(')[1].split(')')[0]))
+    for end in endstring:
+        index = -1
+        for item in address:
+            if item.endswith(end):
+                index += 1
+                filename[index % 2] = ori_idadd + item
+                if index % 2 == 1:
+                    fn = ""
+                    _index = 1
+                    for i, pic_path in enumerate(filename):
+                        content, idnum = identity_ocr_chinese(pic_path)
+                        content = content.replace("\n", "")
+                        conlist = content.split(" ")
+                
+                        if func.is_identi_number(idnum) != False:
+                            fn = idnum
+                            _index = i
+                        else:
+                            for con in conlist:
+                                if func.is_identi_number(con) != False:
+                                    fn = con
+                                    _index = i
+                                    break
+                        if fn != "":
+                            break
+
+                    if fn != "":
+                        filenameend = item.split(".")[1]
+                        newfilename = fn + '_2' + "." + filenameend
+                        shutil.copy(filename[_index], post_idadd + newfilename)
+                        newfilename = fn + '_1' + "." + filenameend
+                        if _index == 1:
+                            _index = 0
+                        else:
+                            _index = 1
+                        shutil.copy(filename[_index], post_idadd + newfilename)
+                    else:
+                        print("No id number found in " + filename[0] + " and " + filename[1])
 
 

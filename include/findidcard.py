@@ -2,6 +2,9 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+from PIL import Image
+import pytesseract
+import re
 
 class findidcard:
     def __init__(self):
@@ -58,7 +61,7 @@ class findidcard:
         else:
             # print("Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT))
             # matchesMask = None
-            return False
+            return False, None
 
         #draw_params = dict(matchColor = (0,255,0), # draw matches in green color
         #           singlePointColor = None,
@@ -71,8 +74,8 @@ class findidcard:
 
         img_data_gray, img_org = self.img_resize_gray(im_r)
         im_r = self.find_idnum(img_data_gray, img_org)
-
-        return im_r
+        idnum, birth = self.get_idnum_and_birth(im_r)
+        return im_r, idnum
 
 
     def showimg(self, img):
@@ -165,6 +168,80 @@ class findidcard:
             #print type(result)
             #showimg(result)
             return cv2.UMat(result)
+    
+    def get_idnum_and_birth(self, img):
+        _, _, red = cv2.split(img)
+        # print('idnum')
+        red = cv2.UMat(red)
+        red = self.hist_equal(red)
+        red = cv2.adaptiveThreshold(red, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 151, 50)
+        red = self.img_resize(red, 150)
+        # cv2.imwrite('idnum_red.png', red)
+        #idnum_str = get_result_fix_length(red, 18, 'idnum', '-psm 8')
+        # idnum_str = get_result_fix_length(red, 18, 'eng', '--psm 8 ')
+        img = Image.fromarray(cv2.UMat.get(red).astype('uint8'))
+        # img.show()
+        idnum_str = self.get_result_vary_length(red, 'eng', img, '--psm 8 ')
+        return idnum_str, idnum_str[6:14]
+
+    def get_result_vary_length(self, red, langset, org_img, custom_config=''):
+        red_org = red
+        # cv2.fastNlMeansDenoising(red, red, 4, 7, 35)
+        rec, red = cv2.threshold(red, 127, 255, cv2.THRESH_BINARY_INV)
+        contours, hierarchy = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # print(len(contours))
+        # 描边一次可以减少噪点
+        cv2.drawContours(red, contours, -1, (255, 255, 255), 1)
+        color_img = cv2.cvtColor(red, cv2.COLOR_GRAY2BGR)
+        numset_contours = []
+        height_list=[]
+        width_list=[]
+        for cnt in contours:
+            x, y, w, h = cv2.boundingRect(cnt)
+            height_list.append(h)
+            # print(h,w)
+            width_list.append(w)
+        height_list.remove(max(height_list))
+        width_list.remove(max(width_list))
+        height_threshold = 0.70*max(height_list)
+        width_threshold = 1.4 * max(width_list)
+        # print('height_threshold:'+str(height_threshold)+'width_threshold:'+str(width_threshold))
+        big_rect=[]
+        for cnt in contours:
+            x, y, w, h = cv2.boundingRect(cnt)
+            if h > height_threshold and w < width_threshold:
+                # print(h,w)
+                numset_contours.append((x, y, w, h))
+                big_rect.append((x, y))
+                big_rect.append((x + w, y + h))
+        big_rect_nparray = np.array(big_rect, ndmin=3)
+        x, y, w, h = cv2.boundingRect(big_rect_nparray)
+
+        # imgrect = cv2.rectangle(color_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # self.showimg(imgrect)
+        # # self.showimg(cv2.UMat.get(org_img)[y:y + h, x:x + w])
+        # self.showimg(cv2.UMat.get(red_org))
+
+        result_string = ''
+        result_string += pytesseract.image_to_string(cv2.UMat.get(red_org), lang=langset,
+                                                    config=custom_config)
+        # print(result_string)
+        # cv2.imwrite('varylength.png', cv2.UMat.get(org_img)[y:y + h, x:x + w])
+        # cv2.imwrite('varylengthred.png', cv2.UMat.get(red_org)[y:y + h, x:x + w])
+        # numset_contours.sort(key=lambda num: num[0])
+        # for x, y, w, h in numset_contours:
+        #     result_string += pytesseract.image_to_string(cv2.UMat.get(color_img)[y:y + h, x:x + w], lang=langset, config=custom_config)
+        return self.punc_filter(result_string)
+
+    def punc_filter(self, str):
+        temp = str
+        xx      =   u"([\u4e00-\u9fff0-9A-Z]+)"
+        pattern =   re.compile(xx)
+        results =   pattern.findall(temp)
+        string = ""
+        for result in results:
+            string += result
+        return string
 
 if __name__=="__main__":
     idfind = findidcard()
