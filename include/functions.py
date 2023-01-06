@@ -2,11 +2,9 @@
 import unicodedata
 import cv2
 import sys
-import math
 import numpy as np
 import os
 import uuid
-import subprocess
 import codecs
 import platform
 import pytesseract
