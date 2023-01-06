@@ -1,10 +1,9 @@
+# -*- coding:utf-8 -*-
 from PIL import Image, ImageFont
 from handright import Template, handwrite
 from common import *
 from random import randint
-# -*- coding:utf-8 -*-
 import os
-import docx
 
 def sign(text, filename):
     ttfcolors = [(0,0,0),(25,25,112),(0,0,205),(160,32,240),(0,0,139)]
