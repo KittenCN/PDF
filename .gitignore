@@ -3,15 +3,17 @@ __pycache__/
 model/
 data/
 predict/
+.gitkeep
 *.py[cod]
 *$py.class
 *.csv
 *.jpg
 *.png
 *.pdf
-!csv/*
-!template/*
-!mask/*
+!csv/data_new.csv
+!template/*.jpg
+!mask/*.jpg
+!sign_template/*.jpg
 
 # C extensions
 *.so
@@ -131,10 +133,10 @@ data
 *.docx
 *.xls
 *.xlsx
-*.csv
-*.jpg
-*.jpeg
-*.png
+# *.csv
+# *.jpg
+# *.jpeg
+# *.png
 *.pkl
 *.pkl.json
 *.log.json
