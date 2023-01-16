@@ -72,7 +72,7 @@ if __name__ == "__main__":
     for item in os.listdir(post_idadd):
         os.remove(post_idadd + item)
     filename = [""] * 2
-    address = os.listdir(ori_idadd)
+    address = [_ for _ in os.listdir(ori_idadd) if _.split('.')[1] in endstring]
     address.sort(key = lambda x:int(x.split('(')[1].split(')')[0]))
     for end in endstring:
         index = -1
