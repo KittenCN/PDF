@@ -7,6 +7,7 @@ from common import *
 import include.functions as func
 import shutil
 import include.findidcard as findidcard
+from tqdm import tqdm
 
 def binarizing(img, threshold):
     pixdata = img.load()
@@ -65,7 +66,7 @@ def identity_ocr_chinese(pic_path):
         content = pytesseract.image_to_string(img, lang='chi_sim')
     return content, idnum
 
-if __name__ == "__main__":
+def ocr_id():
     # pic_path = r"ori_id\img (20).jpg"
     # print(identity_ocr_chinese(pic_path))
     endstring = ["jpg", "png"]
@@ -74,6 +75,8 @@ if __name__ == "__main__":
     filename = [""] * 2
     address = [_ for _ in os.listdir(ori_idadd) if _.split('.')[1] in endstring]
     address.sort(key = lambda x:int(x.split('(')[1].split(')')[0]))
+    pbar = tqdm(total=len(address) * len(endstring))
+    err_list = []
     for end in endstring:
         index = -1
         for item in address:
@@ -111,6 +114,12 @@ if __name__ == "__main__":
                             _index = 1
                         shutil.copy(filename[_index], post_idadd + newfilename)
                     else:
-                        print("No id number found in " + filename[0] + " and " + filename[1])
+                        # print("No id number found in " + filename[0] + " and " + filename[1])
+                        err_list.append("No id number found in " + filename[0] + " and " + filename[1])
+            pbar.update(1)
+    pbar.close()
+    for item in err_list:
+        print(item)
 
-
+if __name__ == "__main__":
+    ocr_id()
